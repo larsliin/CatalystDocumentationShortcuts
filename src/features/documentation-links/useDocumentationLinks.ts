@@ -73,9 +73,9 @@ function buildLinks(currentUrl: string, localhostConfig?: LocalhostConfig): Docu
                 && !applicationUrl.search
                 && !applicationUrl.hash
             ) {
-                links.push({
+                links.unshift({
                     id: 'application',
-                    title: 'Application',
+                    title: 'Configured Environment',
                     url: applicationUrl.href,
                 });
             } else {
