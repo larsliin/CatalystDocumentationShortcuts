@@ -1,160 +1,100 @@
-# Catalyst Documentation Shortcuts - Chrome Extension
+# Catalyst Documentation Shortcuts
 
-A lightweight Chrome extension that generates quick links to documentation websites based on the current domain URL. Click the extension button to open documentation links with a single click or copy them to your clipboard.
+Catalyst Documentation Shortcuts is a lightweight Chrome extension for developers working in Catalyst/Brief environments. It helps you quickly open the right documentation for the current app or environment without manually searching for the correct link.
 
-## 🎯 Features
+## What it does
 
-- **Vue 3 Popup UI** - Modern, reactive interface built with Vue 3 Composition API
-- **Quick Documentation Links** - One-click access to relevant documentation
-- **Copy Links** - Copy documentation URLs directly to clipboard
-- **Open in New Tab** - Open documentation in a new Chrome tab
-- **Hardcoded Link Management** - Simple, fast link access without external data
-- **Bootstrap Icons** - Icon library for UI elements
-- **TypeScript Support** - Full type safety with TypeScript
-- **Vite Build System** - Fast development and production builds with icon and favicon generation
-- **Dark/Light Theme Support** - Consistent styling with theme variables
+When you click the extension icon, it inspects the active tab and builds relevant documentation URLs for the current environment. It supports:
 
-## 🚀 Quick Start
+- localhost/local development setups
+- environment-specific app config lookups
+- opening documentation in a new tab
+- copying a documentation URL to the clipboard
 
-### Prerequisites
-- Node.js (v18+)
-- Chrome browser
+This keeps the workflow fast and reduces time spent navigating between the app and docs.
+
+## Tech stack
+
+- Vue 3 with Composition API
+- TypeScript
+- Vite
+- Chrome Manifest V3 extension APIs
+- ESLint and Stylelint
+- Bootstrap Icons
+- Sharp for icon/favicon generation
+
+## Prerequisites
+
+- Node.js 18+
 - npm
+- Chrome or a Chromium-based browser
 
-### Installation & Build
+## Install
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Build the extension
+## Available npm scripts
+
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Starts the Vite dev server. |
+| `npm run type-check` | Runs TypeScript and Vue type checks with `vue-tsc`. |
+| `npm run lint` | Runs ESLint across the project. |
+| `npm run lint:fix` | Auto-fixes ESLint issues where possible. |
+| `npm run build:icons` | Generates PNG icon assets from the SVG source. |
+| `npm run build:favicon` | Generates favicon assets. |
+| `npm run build:extension` | Runs type checks, generates icons/favicon, builds the extension, and prepares it for Chrome. |
+| `npm run preview` | Serves the production build locally for previewing. |
+
+## Run locally
+
+### Development
+
+```bash
+npm run dev
+```
+
+### Build the extension
+
+```bash
 npm run build:extension
 ```
 
-### Loading in Chrome
+The output is generated in `dist-extension/`.
 
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable **Developer Mode** (toggle in top-right corner)
-3. Click **"Load unpacked"**
-4. Select the `dist-extension` folder from the project directory
-5. The extension is now installed and ready to use!
+## Load in Chrome
 
-## 📁 Project Structure
+1. Open `chrome://extensions/`
+2. Enable Developer Mode
+3. Click `Load unpacked`
+4. Select the `dist-extension` folder in this project
 
-```
-CatalystDocsumentationShortcuts/
-├── src/
-│   ├── Popup.vue                    # Main Vue popup component
-│   ├── components/
-│   │   ├── bascomponents/           # Reusable base components
-│   │   │   ├── BaseAlert.vue        # Alert component
-│   │   │   ├── BaseButton.vue       # Button component
-│   │   │   ├── BaseCheckbox.vue     # Checkbox component
-│   │   │   └── BaseFeedbackBadge.vue # Feedback badge
-│   ├── composables/                 # Reusable logic
-│   ├── utils/                       # Utility functions
-│   ├── assets/                      # Static assets
-│   ├── popup.js                     # Popup entry point
-│   ├── background.js                # Service Worker
-│   ├── content.js                   # Content script
-│   ├── main.js                      # Vue app initialization
-│   ├── style.css                    # Global styles
-│   └── env.d.ts                     # TypeScript environment definitions
-├── public/
-│   ├── manifest.json                # Extension configuration (Manifest v3)
-│   ├── popup.html                   # Popup HTML
-│   ├── popup-init.js                # Popup initialization
-│   ├── icons/                       # Extension icons (16, 48, 128px)
-│   ├── icons.svg                    # SVG icon source
-│   ├── favicon.png                  # Favicon
-│   └── favicon.svg                  # Favicon SVG
-├── scripts/
-│   ├── prepare-extension.js         # Post-build extension setup
-│   ├── convert-icons.js             # SVG to PNG icon conversion
-│   └── generate-favicon.js          # Favicon generation
-├── dist-extension/                  # Build output (ready to load in Chrome)
-├── vite.config.ts                   # Vite configuration
-├── tsconfig.json                    # TypeScript configuration
-├── eslint.config.js                 # ESLint configuration
-├── stylelint.config.js              # Stylelint configuration
-└── package.json                     # Project dependencies and scripts
+## Project structure
+
+```text
+.
+├── public/              # Extension assets and manifest
+├── scripts/             # Icon/favicon and packaging scripts
+├── src/                 # Vue app and extension logic
+├── dist-extension/      # Built extension output
+├── config.example.json  # Example config
+├── eslint.config.js     # ESLint config
+├── package.json         # Scripts and dependencies
+├── README.md            # Project docs
+├── vite.config.ts       # Vite config
+├── tsconfig.json        # TypeScript config
+├── stylelint.config.js  # Stylelint config
+└── ...
 ```
 
-## 📜 npm Scripts
+## Notes
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start Vite development server (http://localhost:9001) |
-| `npm run type-check` | Run TypeScript type checking |
-| `npm run lint` | Run ESLint on all source files |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run build:icons` | Convert SVG icons to PNG (16, 48, 128px) |
-| `npm run build:favicon` | Generate favicon files from SVG |
-| `npm run build:extension` | Complete build: type-check → lint-check → build icons/favicon → bundle with Vite → prepare extension |
-| `npm run preview` | Preview production build locally |
+- This app is intentionally lightweight and focused on quick documentation access.
+- It is designed to help developers move faster between an app and the relevant docs.
+- Local config support is included so localhost setups can resolve environment-specific documentation links.
 
-## 🔧 How It Works
-
-1. **Click Extension** - User clicks the Catalyst Documentation Shortcuts icon in the Chrome toolbar
-2. **View Links** - Popup opens with hardcoded documentation links
-3. **Access Documentation** - Choose how to access:
-   - Click "Open Documentation" to open in a new tab
-   - Click the copy icon to copy the link to clipboard
-4. **Clipboard Ready** - Link is copied and ready to paste anywhere
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Vue 3** - Latest with Composition API and `<script setup>` syntax
-- **TypeScript** - Full type safety across the codebase
-- **Bootstrap Icons** - Icon library for UI elements
-
-### Build & Tooling
-- **Vite 8** - Lightning-fast bundling with optimized output
-- **ESLint** - Code quality with Vue 3, TypeScript, and stylistic rules
-- **Stylelint** - CSS linting for style consistency
-- **Vue TSC** - TypeScript type checking for Vue components
-- **Sharp** - Image processing for icon and favicon generation
-
-### Extension APIs
-- **Manifest v3** - Latest Chrome extension platform
-- **Tabs API** - Open documentation in new tabs
-- **Clipboard API** - Clipboard write access
-- **Scripting API** - Content script management
-- **Active Tab API** - Current tab access
-
-## 📝 Development Guide
-
-### Making Changes
-
-1. Edit files in `src/`
-2. TypeScript types are checked automatically during build
-3. Rebuild extension: `npm run build:extension`
-4. Reload extension in Chrome (or enable auto-reload in developer mode)
-5. Test the updated extension
-
-### Code Quality
-
-Run linting before committing:
-```bash
-npm run lint:fix        # Auto-fix issues
-npm run type-check      # Verify TypeScript
-npm run build:extension # Full validation before build
-```
-
-### Adding Dependencies
-
-- Only add packages to `package.json` when genuinely necessary
-- Run `npm install` after modifying `package.json`
-- Verify build completes successfully
-
-## 🔐 Security & Privacy
-
-- ✅ No external data transmission - all links are hardcoded
-- ✅ No data persistence required - links are loaded on demand
-- ✅ Offline capable - works without internet
-- ✅ No analytics or tracking - complete privacy
-
-## 📄 License
+## License
 
 This project is open source and available under the MIT License.

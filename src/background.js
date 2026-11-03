@@ -7,6 +7,7 @@ const DEFAULT_BRIEF_DOMAINS = [
 ];
 
 const BRIEF_APP_IDENTIFIER = 'brief';
+const ENABLE_ON_ALL_DOMAINS = false;
 
 const USER_FRIENDLY_ERRORS = {
     'Could not establish connection. Receiving end does not exist.':
@@ -128,6 +129,28 @@ function isBriefApplication(domain) {
 }
 
 function updateDeclarativeRules(config) {
+    if (ENABLE_ON_ALL_DOMAINS) {
+        chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+            try {
+                chrome.declarativeContent.onPageChanged.addRules(
+                    [{
+                        conditions: [
+                            new chrome.declarativeContent.PageStateMatcher({
+                                pageUrl: { schemes: ['http', 'https'] },
+                            }),
+                        ],
+                        actions: [
+                            new chrome.declarativeContent.ShowAction(),
+                        ],
+                    }],
+                );
+            } catch (error) {
+                console.error('Failed to set up declarative content rules:', error);
+            }
+        });
+        return;
+    }
+
     const conditions = [
         { hostEquals: 'localhost' },
         { hostEquals: '127.0.0.1' },
@@ -172,7 +195,8 @@ function checkAndUpdateIcon(tabId, url) {
 
     try {
         const urlObj = new URL(url);
-        const isRelevant = isRelevantDomain(urlObj.hostname);
+        const isRelevant = ['http:', 'https:'].includes(urlObj.protocol)
+            && isRelevantDomain(urlObj.hostname);
 
         if (isRelevant) {
             chrome.action.enable(tabId);
@@ -207,6 +231,8 @@ function checkAndUpdateIcon(tabId, url) {
 
 function isRelevantDomain(hostname) {
     if (!hostname) return false;
+
+    if (ENABLE_ON_ALL_DOMAINS) return true;
 
     // For localhost, check if appConfig indicates it's a Brief app
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -277,7 +303,7 @@ async function handleGetConfig(sendResponse) {
 async function handleIsExtensionEnabled(url, sendResponse) {
     try {
         const urlObj = new URL(url);
-        const enabled = isRelevantDomain(urlObj.hostname);
+        const enabled = ['http:', 'https:'].includes(urlObj.protocol) && isRelevantDomain(urlObj.hostname);
         sendResponse({ enabled });
     } catch {
         sendResponse({ enabled: false });

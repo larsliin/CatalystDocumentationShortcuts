@@ -14,6 +14,18 @@ export interface DocumentationLink {
     url: string;
 }
 
+interface LocalhostConfig {
+    tenantHost?: string;
+    applicationHost?: string;
+}
+
+interface AppConfigResponse {
+    success?: boolean;
+    data?: {
+        localhost?: LocalhostConfig;
+    };
+}
+
 export interface UseDocumentationLinksReturn {
     links: Ref<DocumentationLink[]>;
     isLoading: Ref<boolean>;
@@ -37,8 +49,8 @@ export function useDocumentationLinks(): UseDocumentationLinksReturn {
 
                 // If on localhost, fetch appConfig to get tenantHost
                 if (isLocalhost(currentUrl)) {
-                    chrome.runtime.sendMessage({ action: 'getAppConfig' }, (response: any) => {
-                        if (response?.success && response.data?.localhost?.tenantHost) {
+                    chrome.runtime.sendMessage({ action: 'getAppConfig' }, (response: AppConfigResponse) => {
+                        if (response?.success && response.data?.localhost) {
                             const localhostConfig = response.data.localhost;
                             buildLinksFromConfig(currentUrl, localhostConfig);
                         } else {
@@ -75,7 +87,7 @@ export function useDocumentationLinks(): UseDocumentationLinksReturn {
         ];
     }
 
-    function buildLinksFromConfig(currentUrl: string, localhostConfig: any) {
+    function buildLinksFromConfig(currentUrl: string, localhostConfig: LocalhostConfig) {
         const umbracoResult = buildUmbracoLink(currentUrl, localhostConfig);
         const swaggerResult = buildSwaggerLink(currentUrl, localhostConfig);
 
@@ -91,6 +103,30 @@ export function useDocumentationLinks(): UseDocumentationLinksReturn {
                 url: swaggerResult.url,
             },
         ];
+
+        if (localhostConfig.applicationHost?.trim()) {
+            try {
+                const applicationUrl = new URL(`https://${localhostConfig.applicationHost}`);
+                if (
+                    applicationUrl.hostname
+                    && !applicationUrl.username
+                    && !applicationUrl.password
+                    && applicationUrl.pathname === '/'
+                    && !applicationUrl.search
+                    && !applicationUrl.hash
+                ) {
+                    links.value.push({
+                        id: 'application',
+                        title: 'Application',
+                        url: applicationUrl.href,
+                    });
+                } else {
+                    console.error('Invalid localhost applicationHost in appConfig.json.');
+                }
+            } catch (err) {
+                console.error('Invalid localhost applicationHost in appConfig.json:', err);
+            }
+        }
     }
 
     return {
@@ -99,4 +135,3 @@ export function useDocumentationLinks(): UseDocumentationLinksReturn {
         error,
     };
 }
-
