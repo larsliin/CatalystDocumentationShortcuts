@@ -1,28 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <!-- eslint-disable-next-line vue/multi-word-component-names -->
 <script setup lang="ts">
-    import { ref } from 'vue';
     import BaseButton from './components/bascomponents/BaseButton.vue';
     import ClipboardIcon from 'bootstrap-icons/icons/clipboard.svg?raw';
+    import { useDocumentationLinks } from '@/composables/useDocumentationLinks';
 
-    interface DocumentationLink {
-        id: string
-        title: string
-        url: string
-    }
-
-    const links = ref<DocumentationLink[]>([
-        {
-            id: 'vue-docs',
-            title: 'Vue 3 Documentation',
-            url: 'https://vuejs.org',
-        },
-        {
-            id: 'catalyst-docs',
-            title: 'Catalyst Documentation',
-            url: 'https://docs.catalyst.example.com',
-        },
-    ]);
+    const { links } = useDocumentationLinks();
 
     const copyToClipboard = async (url: string) => {
         try {
