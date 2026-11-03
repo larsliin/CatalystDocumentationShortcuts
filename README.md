@@ -19,7 +19,7 @@ This keeps the workflow fast and reduces time spent navigating between the app a
 - TypeScript
 - Vite
 - Chrome Manifest V3 extension APIs
-- ESLint and Stylelint
+- ESLint
 - Bootstrap Icons
 - Sharp for icon/favicon generation
 
@@ -45,7 +45,7 @@ npm install
 | `npm run lint:fix` | Auto-fixes ESLint issues where possible. |
 | `npm run build:icons` | Generates PNG icon assets from the SVG source. |
 | `npm run build:favicon` | Generates favicon assets. |
-| `npm run build:extension` | Runs type checks, generates icons/favicon, builds the extension, and prepares it for Chrome. |
+| `npm run build:extension` | Runs type checks, generates icons/favicon, and builds the extension for Chrome. |
 | `npm run preview` | Serves the production build locally for previewing. |
 
 ## Run locally
@@ -75,17 +75,20 @@ The output is generated in `dist-extension/`.
 
 ```text
 .
-├── public/              # Extension assets and manifest
-├── scripts/             # Icon/favicon and packaging scripts
-├── src/                 # Vue app and extension logic
-├── dist-extension/      # Built extension output
-├── config.example.json  # Example config
-├── eslint.config.js     # ESLint config
-├── package.json         # Scripts and dependencies
-├── README.md            # Project docs
-├── vite.config.ts       # Vite config
-├── tsconfig.json        # TypeScript config
-├── stylelint.config.js  # Stylelint config
+├── public/                         # Manifest and static extension assets
+├── scripts/                        # Icon and favicon generation
+├── src/
+│   ├── components/base/            # Shared UI components
+│   ├── extension/                  # Background service worker and content script
+│   └── features/documentation-links/
+│       ├── components/             # Documentation link UI
+│       ├── utils/                  # URL/link construction
+│       └── useDocumentationLinks.ts
+├── dist-extension/                 # Generated extension build
+├── index.html                      # Local development entry
+├── popup.html                      # Chrome extension popup entry
+├── package.json                    # Scripts and dependencies
+├── vite.config.ts                  # Vite build configuration
 └── ...
 ```
 

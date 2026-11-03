@@ -1,5 +1,4 @@
-// Content script for Documentation Shortcuts Extension
-// Runs in the context of web pages
+// Runs in the page context to read localhost app configuration.
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getAppConfig') {

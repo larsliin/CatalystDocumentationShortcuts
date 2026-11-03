@@ -4,8 +4,6 @@
   "version": "1.0.0",
   "description": "Quick links to documentation websites based on your current domain",
   "permissions": [
-    "activeTab",
-    "scripting",
     "clipboardWrite",
     "tabs",
     "declarativeContent",

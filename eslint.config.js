@@ -58,12 +58,6 @@ export default defineConfig([
         },
     },
     {
-        files: ['src/Popup.vue'],
-        rules: {
-            'vue/multi-word-component-names': 'off',
-        },
-    },
-    {
         files: ['**/*.{ts,tsx}'],
         languageOptions: {
             parser: tsParser,

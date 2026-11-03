@@ -42,9 +42,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getAppConfig') {
-        handleGetConfig(sendResponse);
-    } else if (request.action === 'isExtensionEnabled') {
-        handleIsExtensionEnabled(request.url, sendResponse);
+        handleGetAppConfig(sendResponse);
     }
     return true;
 });
@@ -108,19 +106,15 @@ async function loadAppConfigAndEnableForDomains() {
             if (localhostConfig?.applicationHost && isBriefApplication(localhostConfig.applicationHost)) {
                 updateDeclarativeRules(localhostConfig);
             } else {
-                setupDefaultRules();
+                updateDeclarativeRules(null);
             }
         } else {
-            setupDefaultRules();
+            updateDeclarativeRules(null);
         }
     } catch {
         // Fallback to default domains if appConfig can't be loaded
-        setupDefaultRules();
+        updateDeclarativeRules(null);
     }
-}
-
-function setupDefaultRules() {
-    updateDeclarativeRules(null);
 }
 
 function isBriefApplication(domain) {
@@ -132,18 +126,16 @@ function updateDeclarativeRules(config) {
     if (ENABLE_ON_ALL_DOMAINS) {
         chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
             try {
-                chrome.declarativeContent.onPageChanged.addRules(
-                    [{
-                        conditions: [
-                            new chrome.declarativeContent.PageStateMatcher({
-                                pageUrl: { schemes: ['http', 'https'] },
-                            }),
-                        ],
-                        actions: [
-                            new chrome.declarativeContent.ShowAction(),
-                        ],
-                    }],
-                );
+                chrome.declarativeContent.onPageChanged.addRules([{
+                    conditions: [
+                        new chrome.declarativeContent.PageStateMatcher({
+                            pageUrl: { schemes: ['http', 'https'] },
+                        }),
+                    ],
+                    actions: [
+                        new chrome.declarativeContent.ShowAction(),
+                    ],
+                }]);
             } catch (error) {
                 console.error('Failed to set up declarative content rules:', error);
             }
@@ -231,7 +223,6 @@ function checkAndUpdateIcon(tabId, url) {
 
 function isRelevantDomain(hostname) {
     if (!hostname) return false;
-
     if (ENABLE_ON_ALL_DOMAINS) return true;
 
     // For localhost, check if appConfig indicates it's a Brief app
@@ -254,7 +245,7 @@ function getUserFriendlyError(techError) {
     return 'Failed to read appConfig.json. Try reloading the page.';
 }
 
-async function handleGetConfig(sendResponse) {
+async function handleGetAppConfig(sendResponse) {
     try {
         // Query for the active tab since message comes from popup, not content script
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -297,15 +288,5 @@ async function handleGetConfig(sendResponse) {
             success: false,
             error: 'Could not access the page. Try reloading the page.',
         });
-    }
-}
-
-async function handleIsExtensionEnabled(url, sendResponse) {
-    try {
-        const urlObj = new URL(url);
-        const enabled = ['http:', 'https:'].includes(urlObj.protocol) && isRelevantDomain(urlObj.hostname);
-        sendResponse({ enabled });
-    } catch {
-        sendResponse({ enabled: false });
     }
 }
