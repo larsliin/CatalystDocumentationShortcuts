@@ -78,3 +78,30 @@ If a push to GitHub over HTTPS is blocked because Git is not authenticated:
 - Run `git credential-manager github login` in an interactive terminal so the user can complete sign-in. If the agent's terminal cannot open interactive authentication, ask the user to run the command in their own terminal.
 - Wait for authentication to complete before retrying the authorized push. Authentication does not replace the explicit permission required to push.
 - Never ask the user to paste passwords or access tokens into chat or store them in repository files.
+
+### NEVER auto-create documentation files
+
+**CRITICAL RULE: Do NOT create .md documentation files during normal code editing.**
+
+Copilot must **NEVER EVER** auto-generate documentation markdown files like:
+- ❌ SETUP_SUMMARY.md
+- ❌ BUILD_STATUS.md
+- ❌ COMPONENT_STRUCTURE.md
+- ❌ QUICK_START.md
+- ❌ FINAL_SUMMARY.md
+- ❌ INDEX.md
+- ❌ COMPLETION_CHECKLIST.md
+- ❌ Any other auto-generated .md files
+
+**Why:** Auto-creating documentation files clutters the repository with noise and creates unnecessary commits.
+
+**When to create documentation:**
+- ✅ Only when the user **explicitly requests** it: "Create a guide for...", "Document this...", "Write a README...", etc.
+- ✅ Never as a side-effect of fixing bugs or adding features
+- ✅ The user will ask for documentation when they actually need it
+
+**What to do instead:**
+- Focus on the requested code changes
+- Provide explanations in your response chat (don't put them in files)
+- Let the user decide if documentation files are needed
+

@@ -33,7 +33,7 @@ export function useLocalhostInjection() {
             }
 
             return { success: true };
-        } catch (err) {
+        } catch (_err) { // eslint-disable-line no-unused-vars
             return {
                 success: false,
                 error: 'Could not set up localhost configuration for this page.',

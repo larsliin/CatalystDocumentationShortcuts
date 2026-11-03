@@ -1,20 +1,18 @@
-# Config Copier - Chrome Extension
+# Catalyst Documentation Shortcuts - Chrome Extension
 
-A lightweight Chrome extension that copies configuration data from downloaded config files to your clipboard when clicking the extension button in the toolbar.
+A lightweight Chrome extension that generates quick links to documentation websites based on the current domain URL. Click the extension button to open documentation links with a single click or copy them to your clipboard.
 
 ## 🎯 Features
 
 - **Vue 3 Popup UI** - Modern, reactive interface built with Vue 3 Composition API
-- **Config Editor** - CodeMirror-based JSON editor with syntax highlighting
-- **Config Controls** - Load, save, and manage configuration files
-- **Background Service Worker** - Manages config retrieval and clipboard operations
-- **Content Script** - Monitors webpage activity
-- **Chrome Storage API** - Persists configuration data locally
-- **Clipboard Integration** - One-click copy to clipboard with feedback
-- **Theme Support** - Dark/light theme toggle with persistent storage
-- **Localhost Injection** - Automatic configuration injection into localhost environments
+- **Quick Documentation Links** - One-click access to relevant documentation
+- **Copy Links** - Copy documentation URLs directly to clipboard
+- **Open in New Tab** - Open documentation in a new Chrome tab
+- **Hardcoded Link Management** - Simple, fast link access without external data
+- **Bootstrap Icons** - Icon library for UI elements
 - **TypeScript Support** - Full type safety with TypeScript
 - **Vite Build System** - Fast development and production builds with icon and favicon generation
+- **Dark/Light Theme Support** - Consistent styling with theme variables
 
 ## 🚀 Quick Start
 
@@ -44,21 +42,17 @@ npm run build:extension
 ## 📁 Project Structure
 
 ```
-AppConfig/
+CatalystDocsumentationShortcuts/
 ├── src/
 │   ├── Popup.vue                    # Main Vue popup component
 │   ├── components/
-│   │   ├── ConfigEditor.vue         # JSON editor with CodeMirror
-│   │   ├── ConfigControls.vue       # Load/save/copy controls
-│   │   ├── PopupHeader.vue          # Header with theme toggle
-│   │   └── bascomponents/           # Reusable base components
-│   ├── composables/
-│   │   ├── useConfigManager.ts      # Config state management
-│   │   ├── useFeedback.ts           # Toast feedback messages
-│   │   ├── useLocalhostInjection.ts # Config injection for localhost
-│   │   └── useTheme.ts              # Theme management
-│   ├── utils/
-│   │   └── constants.ts             # App constants
+│   │   ├── bascomponents/           # Reusable base components
+│   │   │   ├── BaseAlert.vue        # Alert component
+│   │   │   ├── BaseButton.vue       # Button component
+│   │   │   ├── BaseCheckbox.vue     # Checkbox component
+│   │   │   └── BaseFeedbackBadge.vue # Feedback badge
+│   ├── composables/                 # Reusable logic
+│   ├── utils/                       # Utility functions
 │   ├── assets/                      # Static assets
 │   ├── popup.js                     # Popup entry point
 │   ├── background.js                # Service Worker
@@ -101,22 +95,18 @@ AppConfig/
 
 ## 🔧 How It Works
 
-1. **Download Config File** - Config file is downloaded on a webpage
-2. **Click Extension** - User clicks the Config Copier icon in the Chrome toolbar
-3. **Edit & Manage** - Popup opens with config editor and controls:
-   - View/edit JSON with syntax highlighting
-   - Load config from file
-   - Save current config
-   - Copy to clipboard
-4. **Feedback** - Success/error messages provide immediate feedback
-5. **Persistent Storage** - Configs are saved in Chrome storage API for offline access
+1. **Click Extension** - User clicks the Catalyst Documentation Shortcuts icon in the Chrome toolbar
+2. **View Links** - Popup opens with hardcoded documentation links
+3. **Access Documentation** - Choose how to access:
+   - Click "Open Documentation" to open in a new tab
+   - Click the copy icon to copy the link to clipboard
+4. **Clipboard Ready** - Link is copied and ready to paste anywhere
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **Vue 3** - Latest with Composition API and `<script setup>` syntax
 - **TypeScript** - Full type safety across the codebase
-- **CodeMirror 6** - Advanced JSON editor with syntax highlighting and one-dark theme
 - **Bootstrap Icons** - Icon library for UI elements
 
 ### Build & Tooling
@@ -128,7 +118,7 @@ AppConfig/
 
 ### Extension APIs
 - **Manifest v3** - Latest Chrome extension platform
-- **Chrome Storage API** - Local persistence
+- **Tabs API** - Open documentation in new tabs
 - **Clipboard API** - Clipboard write access
 - **Scripting API** - Content script management
 - **Active Tab API** - Current tab access
@@ -160,9 +150,9 @@ npm run build:extension # Full validation before build
 
 ## 🔐 Security & Privacy
 
-- ✅ No external data transmission - all operations are local
-- ✅ Chrome Storage API only - data never leaves the browser
-- ✅ Offline capable - works without internet once config is loaded
+- ✅ No external data transmission - all links are hardcoded
+- ✅ No data persistence required - links are loaded on demand
+- ✅ Offline capable - works without internet
 - ✅ No analytics or tracking - complete privacy
 
 ## 📄 License

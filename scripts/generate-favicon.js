@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';

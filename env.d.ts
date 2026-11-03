@@ -6,4 +6,6 @@ declare module '*.vue' {
     export default component;
 }
 
+// eslint-disable-next-line no-unused-vars
 declare const chrome: any;
+

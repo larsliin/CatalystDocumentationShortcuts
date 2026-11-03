@@ -1,20 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Config Copier",
+  "name": "Catalyst Documentation Shortcuts",
   "version": "1.0.0",
-  "description": "Copy configuration from downloaded config files to clipboard",
+  "description": "Quick links to documentation websites based on your current domain",
   "permissions": [
     "activeTab",
     "scripting",
-    "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Catalyst appConfig copier"
+    "default_title": "Catalyst Documentation Shortcuts"
   },
   "background": {
     "service_worker": "background.js"

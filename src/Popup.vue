@@ -1,132 +1,71 @@
+<!-- eslint-disable vue/multi-word-component-names -->
+<!-- eslint-disable-next-line vue/multi-word-component-names -->
 <script setup lang="ts">
-    import { ref, onMounted, watch } from 'vue';
-    import BaseFeedbackBadge from './components/bascomponents/BaseFeedbackBadge.vue';
-    import BaseAlert from './components/bascomponents/BaseAlert.vue';
-    import PopupHeader from './components/PopupHeader.vue';
-    import ConfigEditor from './components/ConfigEditor.vue';
-    import ConfigControls from './components/ConfigControls.vue';
-    import { useTheme } from './composables/useTheme';
-    import { useConfigManager } from './composables/useConfigManager';
-    import { useFeedback } from './composables/useFeedback';
+    import { ref } from 'vue';
+    import BaseButton from './components/bascomponents/BaseButton.vue';
+    import ClipboardIcon from 'bootstrap-icons/icons/clipboard.svg?raw';
 
-    const isDarkMode = ref(true);
-    const editor = ref<InstanceType<typeof ConfigEditor>>();
+    interface DocumentationLink {
+        id: string
+        title: string
+        url: string
+    }
 
-    const { showCopyFeedback, showErrorFeedback, feedbackKey, showFeedback, clearFeedback } = useFeedback();
+    const links = ref<DocumentationLink[]>([
+        {
+            id: 'vue-docs',
+            title: 'Vue 3 Documentation',
+            url: 'https://vuejs.org',
+        },
+        {
+            id: 'catalyst-docs',
+            title: 'Catalyst Documentation',
+            url: 'https://docs.catalyst.example.com',
+        },
+    ]);
 
-    const {
-        configData,
-        appConfig,
-        error,
-        warningError,
-        loading,
-        injectLocalhost,
-        isRefreshDisabled,
-        isEditorDisabled,
-        isCheckboxLocalhostDisabled,
-        displayedConfig,
-        handleRefresh,
-        updateEditorContent,
-        initializeLocalhost,
-        cleanupTimeouts,
-    } = useConfigManager();
-
-    useTheme();
-
-    watch(injectLocalhost, () => {
-        if (configData.value) {
-            updateEditorContent(displayedConfig.value);
-        }
-    });
-
-    watch(isDarkMode, () => {
-        if (appConfig.value) {
-            updateEditorContent(appConfig.value);
-        }
-    });
-
-    async function handleCopyToClipboard() {
+    const copyToClipboard = async (url: string) => {
         try {
-            const textToCopy = editor.value?.getEditorContent() || appConfig.value;
-            if (!textToCopy) {
-                return;
-            }
-            await navigator.clipboard.writeText(textToCopy);
-            showFeedback('success');
+            await navigator.clipboard.writeText(url);
         } catch (err) {
             console.error('Failed to copy:', err);
-            showFeedback('error');
         }
-    }
+    };
 
-    function updateThemeDetection() {
-        const root = document.documentElement;
-        const hasLightThemeAttr = root.hasAttribute('data-theme');
-        isDarkMode.value = !hasLightThemeAttr;
-    }
-
-    onMounted(() => {
-        try {
-            updateThemeDetection();
-
-            const observer = new MutationObserver(() => {
-                updateThemeDetection();
-            });
-
-            observer.observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['data-theme'],
-            });
-
-            initializeLocalhost();
-            handleRefresh();
-
-            return () => {
-                observer.disconnect();
-                clearFeedback();
-                cleanupTimeouts();
-            };
-        } catch (err) {
-            console.error('Error during component mount:', err);
-        }
-    });
+    const openDocumentation = (url: string) => {
+        chrome.tabs.create({ url });
+    };
 </script>
 
 <template>
     <div id="app">
-        <div class="config-container">
-            <BaseFeedbackBadge
-                :key="`success-${feedbackKey}`"
-                variant="success"
-                :show="showCopyFeedback"
-                @finished="clearFeedback"
-            />
-            <BaseFeedbackBadge
-                :key="`error-${feedbackKey}`"
-                variant="error"
-                :show="showErrorFeedback"
-                @finished="clearFeedback"
-            />
-
-            <PopupHeader :is-refresh-disabled="isRefreshDisabled" @refresh="handleRefresh" />
-
-            <BaseAlert :show="!!error" :message="error" variant="error" />
-            <BaseAlert :show="!!warningError" :message="warningError" variant="warning" />
-
-            <ConfigEditor
-                ref="editor"
-                :content="appConfig"
-                :is-dark-mode="isDarkMode"
-                :is-disabled="isEditorDisabled"
-            />
-
-            <ConfigControls
-                :inject-localhost="injectLocalhost"
-                :is-checkbox-disabled="isCheckboxLocalhostDisabled"
-                :is-copy-disabled="!displayedConfig"
-                @update:inject-localhost="(val) => (injectLocalhost = val)"
-                @copy="handleCopyToClipboard"
-            />
+        <div class="links-container">
+            <div v-for="link in links" :key="link.id" class="link-item">
+                <div class="link-info">
+                    <h2>{{ link.title }}</h2>
+                    <p class="link-url">{{ link.url }}</p>
+                </div>
+                <div class="link-actions">
+                    <BaseButton @click="openDocumentation(link.url)" class="action-button">
+                        Open Documentation
+                    </BaseButton>
+                    <button
+                        @click="copyToClipboard(link.url)"
+                        class="copy-button"
+                        :title="`Copy ${link.title} link`"
+                        aria-label="Copy link"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            class="copy-icon"
+                            v-html="ClipboardIcon"
+                        />
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -139,12 +78,88 @@
         flex-direction: column;
     }
 
-    .config-container {
+    .links-container {
         flex: 1;
         display: flex;
         flex-direction: column;
         padding: 12px;
         gap: 12px;
+        overflow-y: auto;
+    }
+
+    .link-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        background-color: var(--color-panel);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-button);
+        transition: background-color 0.2s;
+    }
+
+    .link-item:hover {
+        background-color: var(--color-panel-raised);
+    }
+
+    .link-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .link-item h2 {
+        margin: 0 0 4px 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .link-url {
+        font-size: 12px;
+        color: var(--color-text-muted);
         overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .link-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .action-button {
+        white-space: nowrap;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .copy-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: 1px solid var(--color-button-secondary-border);
+        background-color: var(--color-button-secondary);
+        color: var(--color-text);
+        border-radius: var(--radius-button);
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .copy-button:hover {
+        background-color: var(--color-button-secondary-hover);
+        border-color: var(--color-button-secondary-border-hover);
+    }
+
+    .copy-button:active {
+        background-color: var(--color-active);
+    }
+
+    .copy-icon {
+        flex-shrink: 0;
     }
 </style>

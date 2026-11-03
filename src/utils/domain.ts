@@ -32,13 +32,13 @@ export function extractDomain(url: string): string {
  */
 function findUnknownAppName(domain: string): string | null {
     const parts = domain.split('.');
-    
+
     for (const part of parts) {
         // Check if this part looks like an app name (not catalyst, online, com, etc.)
         // but is not in our known list
-        if (part !== 'catalyst' && part !== 'online' && part !== 'com' && 
-            !part.match(/^\d+$/) && // skip numeric parts
-            !SETTINGS.APP_NAMES.includes(part)) {
+        if (part !== 'catalyst' && part !== 'online' && part !== 'com'
+            && !part.match(/^\d+$/) // skip numeric parts
+            && !SETTINGS.APP_NAMES.includes(part)) {
             // Could be an unknown app - check if it's in a typical position (after tenant, before catalyst)
             const partIndex = parts.indexOf(part);
             if (partIndex > 0 && partIndex < parts.length - 1) {
@@ -61,7 +61,7 @@ function findUnknownAppName(domain: string): string | null {
  */
 export function extractTenantHost(domain: string): string {
     const parts = domain.split('.');
-    
+
     // Check if any app name exists in the domain parts
     for (const appName of SETTINGS.APP_NAMES) {
         const appIndex = parts.indexOf(appName);
@@ -72,7 +72,7 @@ export function extractTenantHost(domain: string): string {
             return parts.join('.');
         }
     }
-    
+
     // No known app name matched - return domain as-is (including any unknown app)
     return domain;
 }

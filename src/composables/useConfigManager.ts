@@ -10,8 +10,8 @@ export function useConfigManager() {
     const warningError = ref('');
     const loading = ref(false);
 
-    const { injectLocalhost, injectLocalhostDisabled, LOCALHOST_OBJECT, isCheckboxDisabled, setLocalhostObject } =
-        useLocalhostInjection();
+    const { injectLocalhost, injectLocalhostDisabled, LOCALHOST_OBJECT, isCheckboxDisabled, setLocalhostObject }
+        = useLocalhostInjection();
 
     const isRefreshDisabled = computed(() => loading.value || !!error.value);
     const isEditorDisabled = computed(() => !!error.value);
@@ -25,11 +25,11 @@ export function useConfigManager() {
                 return JSON.stringify(
                     { localhost: LOCALHOST_OBJECT.value, ...configData.value },
                     null,
-                    2
+                    2,
                 );
             }
             return JSON.stringify(configData.value, null, 2);
-        } catch (err) {
+        } catch (_err) { // eslint-disable-line no-unused-vars
             setError('The appConfig.json file is not in a valid format. Please check the file.');
             return '';
         }
@@ -61,7 +61,7 @@ export function useConfigManager() {
         return true;
     }
 
-    function queryAndValidateTabUrl(callback: (url: string | null) => void) {
+    function queryAndValidateTabUrl(callback: (_url: string | null) => void) { // eslint-disable-line no-unused-vars
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
             if (checkChromeError('Failed to query active tab')) return;
             if (!tabs || tabs.length === 0) {
@@ -143,7 +143,7 @@ export function useConfigManager() {
                 }
 
                 updateEditorContent(displayedConfig.value);
-            } catch (err) {
+            } catch (_err) { // eslint-disable-line no-unused-vars
                 setError('Could not process the appConfig.json file. Try reloading the page.');
                 updateEditorContent('');
                 injectLocalhost.value = wasInjectLocalhostEnabled;
