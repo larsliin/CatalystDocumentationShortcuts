@@ -56,13 +56,13 @@
         border: 1px solid var(--color-border);
         border-radius: 10px;
         box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-        transition: background-color 0.16s, border-color 0.16s, transform 0.16s;
+        transition: background-color 0.16s, border-color 0.16s;
+        cursor: default;
     }
 
     .link-item:hover {
         background-color: var(--color-panel-raised);
         border-color: var(--color-focus);
-        transform: translateY(-1px);
     }
 
     .link-mark {

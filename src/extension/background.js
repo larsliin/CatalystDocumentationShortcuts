@@ -1,12 +1,30 @@
 // Background Service Worker for Documentation Shortcuts Extension
 
-const DEFAULT_BRIEF_DOMAINS = [
+const SUPPORTED_DOMAINS = [
     'wppes-map-dev.com',
     'wppes-map-stage.com',
     'catalyst.online',
 ];
 
-const BRIEF_APP_IDENTIFIER = 'brief';
+const DOCUMENTATION_PORTALS = [
+    'oes.wppes-map-stage.com',
+];
+
+const SUPPORTED_APPS = [
+    'companion',
+    'studio',
+    'segment',
+    'umbraco',
+    'brief',
+    'analytics',
+    'qa',
+    'inbox',
+    'monitor',
+    'toolbox',
+    'management',
+    'promptlab',
+];
+
 const ENABLE_ON_ALL_DOMAINS = false;
 
 const USER_FRIENDLY_ERRORS = {
@@ -103,7 +121,7 @@ async function loadAppConfigAndEnableForDomains() {
         if (response.ok) {
             const config = await response.json();
             localhostConfig = config.localhost;
-            if (localhostConfig?.applicationHost && isBriefApplication(localhostConfig.applicationHost)) {
+                if (localhostConfig?.applicationHost && isSupportedApplication(localhostConfig.applicationHost)) {
                 updateDeclarativeRules(localhostConfig);
             } else {
                 updateDeclarativeRules(null);
@@ -117,9 +135,9 @@ async function loadAppConfigAndEnableForDomains() {
     }
 }
 
-function isBriefApplication(domain) {
-    // Check if domain contains '.brief.' to identify Brief application
-    return domain && domain.includes(`.${BRIEF_APP_IDENTIFIER}.`);
+function isSupportedApplication(domain) {
+    // Check if domain contains any of the supported applications
+    return domain && SUPPORTED_APPS.some(app => domain.includes(`.${app}.`));
 }
 
 function updateDeclarativeRules(config) {
@@ -148,19 +166,25 @@ function updateDeclarativeRules(config) {
         { hostEquals: '127.0.0.1' },
     ];
 
-    // For localhost with valid appConfig, add the Brief domain
-    if (config?.applicationHost && isBriefApplication(config.applicationHost)) {
-        // Extract the base domain part (e.g., "wppes-map-dev.com" from "dev1.brief.wppes-map-dev.com")
+    // For localhost with valid appConfig, add the supported domain
+    if (config?.applicationHost && isSupportedApplication(config.applicationHost)) {
+        // Extract the base domain part (e.g., "wppes-map-dev.com" from "dev1.analytics.wppes-map-dev.com")
         const parts = config.applicationHost.split('.');
-        const briefIndex = parts.indexOf(BRIEF_APP_IDENTIFIER);
-        if (briefIndex > 0 && briefIndex < parts.length - 1) {
-            const baseDomain = parts.slice(briefIndex + 1).join('.');
-            conditions.push({ hostContains: baseDomain });
-        }
+        const lastTwoParts = parts.slice(-2).join('.');
+        conditions.push({ hostContains: lastTwoParts });
     } else {
-        // For production, add Brief apps on known domains
-        DEFAULT_BRIEF_DOMAINS.forEach(domain => {
-            conditions.push({ hostContains: `.${BRIEF_APP_IDENTIFIER}.${domain}` });
+        // For production, add supported apps on known domains
+        SUPPORTED_DOMAINS.forEach(domain => {
+            SUPPORTED_APPS.forEach(app => {
+                conditions.push({ hostContains: `.${app}.${domain}` });
+            });
+        });
+
+        // Add documentation portal URLs (oes.wppes-map-dev.com/application/scalar)
+        DOCUMENTATION_PORTALS.forEach(portal => {
+            SUPPORTED_APPS.forEach(app => {
+                conditions.push({ urlContains: `${portal}/${app}/` });
+            });
         });
     }
 
@@ -188,7 +212,7 @@ function checkAndUpdateIcon(tabId, url) {
     try {
         const urlObj = new URL(url);
         const isRelevant = ['http:', 'https:'].includes(urlObj.protocol)
-            && isRelevantDomain(urlObj.hostname);
+            && isRelevantDomain(urlObj.hostname, url);
 
         if (isRelevant) {
             chrome.action.enable(tabId);
@@ -221,17 +245,24 @@ function checkAndUpdateIcon(tabId, url) {
     }
 }
 
-function isRelevantDomain(hostname) {
+function isRelevantDomain(hostname, fullUrl = '') {
     if (!hostname) return false;
     if (ENABLE_ON_ALL_DOMAINS) return true;
 
-    // For localhost, check if appConfig indicates it's a Brief app
+    // For localhost, check if appConfig indicates it's a supported app
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return localhostConfig?.applicationHost && isBriefApplication(localhostConfig.applicationHost);
+        return localhostConfig?.applicationHost && isSupportedApplication(localhostConfig.applicationHost);
     }
 
-    // For other domains, check if it's a Brief application on a known domain
-    return DEFAULT_BRIEF_DOMAINS.some(domain => hostname.includes(`.${BRIEF_APP_IDENTIFIER}.${domain}`));
+    // Check for documentation portal URLs (oes.wppes-map-stage.com/application/scalar)
+    if (fullUrl && DOCUMENTATION_PORTALS.some(portal => hostname.includes(portal))) {
+        return SUPPORTED_APPS.some(app => fullUrl.includes(`/${app}/`));
+    }
+
+    // For other domains, check if it's a supported application on a known domain
+    return SUPPORTED_DOMAINS.some(domain => {
+        return SUPPORTED_APPS.some(app => hostname.includes(`.${app}.${domain}`));
+    });
 }
 
 function getUserFriendlyError(techError) {

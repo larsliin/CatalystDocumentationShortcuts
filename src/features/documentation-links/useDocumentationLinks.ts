@@ -1,5 +1,11 @@
 import { onMounted, ref } from 'vue';
-import { buildSwaggerLink, buildUmbracoLink, isLocalhost } from './utils/linkBuilders';
+import {
+    buildSwaggerLink,
+    buildUmbracoLink,
+    isLocalhost,
+    buildApplicationDocumentationLinks,
+    isOnDocumentationPortal,
+} from './utils/linkBuilders';
 
 export interface DocumentationLink {
     id: string;
@@ -48,18 +54,45 @@ export function useDocumentationLinks() {
 }
 
 function buildLinks(currentUrl: string, localhostConfig?: LocalhostConfig): DocumentationLink[] {
-    const links: DocumentationLink[] = [
-        {
-            id: 'umbraco-docs',
-            title: 'Umbraco',
-            url: buildUmbracoLink(currentUrl, localhostConfig).url,
-        },
-        {
-            id: 'swagger-docs',
-            title: 'Swagger Documentation',
-            url: buildSwaggerLink(currentUrl, localhostConfig).url,
-        },
-    ];
+    const links: DocumentationLink[] = [];
+    const isUmbraco = currentUrl.includes('.umbraco.');
+    const isBrief = currentUrl.includes('.brief.');
+    const onDocPortal = isOnDocumentationPortal(currentUrl);
+
+    const appDocLinks = buildApplicationDocumentationLinks(currentUrl, localhostConfig);
+    
+    appDocLinks.forEach((linkResult, index) => {
+        if (linkResult.url) {
+            let title = 'Documentation';
+            
+            if (isUmbraco) {
+                title = 'Brief';
+            } else if (isBrief) {
+                title = index === 0 ? 'Umbraco' : 'Swagger Documentation';
+            } else if (onDocPortal) {
+                title = 'Application';
+            } else {
+                title = 'API Documentation';
+            }
+            
+            links.push({
+                id: `doc-link-${index}`,
+                title,
+                url: linkResult.url,
+            });
+        }
+    });
+
+    if (links.length === 0) {
+        const swaggerLink = buildSwaggerLink(currentUrl, localhostConfig);
+        if (swaggerLink.url) {
+            links.push({
+                id: 'swagger-docs',
+                title: 'Swagger Documentation',
+                url: swaggerLink.url,
+            });
+        }
+    }
 
     const applicationHost = localhostConfig?.applicationHost?.trim();
     if (applicationHost) {
