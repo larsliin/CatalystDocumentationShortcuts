@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import BookIcon from 'bootstrap-icons/icons/book-half.svg?raw';
+    import CheckIcon from 'bootstrap-icons/icons/check.svg?raw';
     import CopyIcon from 'bootstrap-icons/icons/copy.svg?raw';
     import ExternalLinkIcon from 'bootstrap-icons/icons/box-arrow-up-right.svg?raw';
     import BaseButton from '@/components/base/BaseButton.vue';
@@ -7,6 +8,7 @@
 
     defineProps<{
         link: DocumentationLink;
+        copied: boolean;
     }>();
 
     const emit = defineEmits<{
@@ -36,11 +38,16 @@
             <button
                 class="copy-button"
                 type="button"
-                :title="`Copy ${link.title} link`"
-                :aria-label="`Copy ${link.title} link`"
+                :title="copied ? 'Copied' : `Copy ${link.title} link`"
+                :aria-label="copied ? 'Copied' : `Copy ${link.title} link`"
                 @click="emit('copy', link.url)"
             >
-                <span class="copy-icon" aria-hidden="true" v-html="CopyIcon" />
+                <span
+                    class="copy-icon"
+                    :class="{ 'copy-icon-copied': copied }"
+                    aria-hidden="true"
+                    v-html="copied ? CheckIcon : CopyIcon"
+                />
             </button>
         </div>
     </article>
@@ -136,6 +143,11 @@
     .copy-icon :deep(svg) {
         width: 16px;
         height: 16px;
+    }
+
+    .copy-icon-copied :deep(svg) {
+        width: 28px;
+        height: 28px;
     }
 
     .copy-button {

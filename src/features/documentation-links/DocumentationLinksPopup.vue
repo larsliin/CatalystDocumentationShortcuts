@@ -8,13 +8,21 @@
 
     const { links, loading, ready, error, warning, notice } = useDocumentationLinks();
     const copyError = ref('');
+    const copiedUrl = ref('');
+    let copyFeedbackTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const isEmpty = computed(() => ready.value && !error.value && !notice.value && links.value.length === 0);
 
     async function copyToClipboard(url: string) {
         copyError.value = '';
+        copiedUrl.value = '';
+        clearTimeout(copyFeedbackTimeout);
         try {
             await navigator.clipboard.writeText(url);
+            copiedUrl.value = url;
+            copyFeedbackTimeout = setTimeout(() => {
+                copiedUrl.value = '';
+            }, 1200);
         } catch (err) {
             console.error('Failed to copy:', err);
             copyError.value = 'Could not copy the link to the clipboard.';
@@ -54,6 +62,7 @@
                     v-for="link in links"
                     :key="link.id"
                     :link="link"
+                    :copied="copiedUrl === link.url"
                     @open="openDocumentation"
                     @copy="copyToClipboard"
                 />
