@@ -1,15 +1,23 @@
 <script setup lang="ts">
+    import { computed, ref } from 'vue';
     import BookIcon from 'bootstrap-icons/icons/book-half.svg?raw';
+    import BaseAlert from '@/components/base/BaseAlert.vue';
+    import BaseLoadingBar from '@/components/base/BaseLoadingBar.vue';
     import DocumentationLinkItem from './components/DocumentationLinkItem.vue';
     import { useDocumentationLinks } from './useDocumentationLinks';
 
-    const { links } = useDocumentationLinks();
+    const { links, loading, ready, error, warning, notice } = useDocumentationLinks();
+    const copyError = ref('');
+
+    const isEmpty = computed(() => ready.value && !error.value && !notice.value && links.value.length === 0);
 
     async function copyToClipboard(url: string) {
+        copyError.value = '';
         try {
             await navigator.clipboard.writeText(url);
-        } catch (error) {
-            console.error('Failed to copy:', error);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            copyError.value = 'Could not copy the link to the clipboard.';
         }
     }
 
@@ -30,14 +38,26 @@
             </div>
         </header>
 
-        <section class="links-container" aria-label="Documentation links">
-            <DocumentationLinkItem
-                v-for="link in links"
-                :key="link.id"
-                :link="link"
-                @open="openDocumentation"
-                @copy="copyToClipboard"
-            />
+        <section class="links-container" aria-label="Documentation links" :aria-busy="!ready">
+            <BaseLoadingBar v-if="loading" label="Reading appConfig.json" />
+            <template v-else-if="ready">
+                <BaseAlert :message="error" variant="error" />
+                <BaseAlert :message="copyError" variant="error" />
+                <BaseAlert :message="warning" variant="warning" />
+                <BaseAlert :message="notice" variant="info" />
+                <BaseAlert
+                    v-if="isEmpty"
+                    message="No documentation links are available for this page."
+                    variant="info"
+                />
+                <DocumentationLinkItem
+                    v-for="link in links"
+                    :key="link.id"
+                    :link="link"
+                    @open="openDocumentation"
+                    @copy="copyToClipboard"
+                />
+            </template>
         </section>
     </div>
 </template>

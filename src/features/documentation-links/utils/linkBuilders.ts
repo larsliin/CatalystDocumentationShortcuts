@@ -1,4 +1,4 @@
-import { SETTINGS } from '@/config/settings';
+import { APP, SETTINGS } from '@/config/settings';
 
 interface LinkBuilderResult {
     url: string;
@@ -43,7 +43,7 @@ function buildHttpsUrl(hostname: string, pathname: string): string {
 export function isLocalhost(currentUrl: string): boolean {
     try {
         const url = new URL(currentUrl);
-        return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+        return SETTINGS.LOCALHOST_HOSTNAMES.includes(url.hostname);
     } catch {
         return false;
     }
@@ -56,9 +56,9 @@ function getDocumentationHostname(currentUrl: string, localhostConfig?: Localhos
     try {
         const url = new URL(currentUrl);
         const labels = url.hostname.split('.');
-        const briefIndex = labels.indexOf('brief');
+        const briefIndex = labels.indexOf(APP.BRIEF);
         if (briefIndex > 0 && briefIndex < labels.length - 1) {
-            labels[briefIndex] = 'umbraco';
+            labels[briefIndex] = APP.UMBRACO;
             return labels.join('.');
         }
     } catch {
@@ -83,7 +83,7 @@ function detectApplicationFromUrl(url: string): string | null {
         const urlObj = new URL(url);
         const hostname = urlObj.hostname;
 
-        if (hostname.includes('oes.wppes-map-stage.com')) {
+        if (hostname.includes(SETTINGS.DOCUMENTATION_PORTAL.HOST)) {
             const pathname = urlObj.pathname.replace(/^\//, '').split('/')[0];
             if (pathname && SETTINGS.APP_NAMES.includes(pathname)) {
                 return pathname;
@@ -107,8 +107,8 @@ export function isOnDocumentationPortal(currentUrl: string): boolean {
         const urlObj = new URL(currentUrl);
         const hostname = urlObj.hostname;
         const pathname = urlObj.pathname.replace(/^\//, '').split('/')[0];
-        
-        return hostname.includes('oes.wppes-map-stage.com') && !!pathname && SETTINGS.APP_NAMES.includes(pathname);
+
+        return hostname.includes(SETTINGS.DOCUMENTATION_PORTAL.HOST) && !!pathname && SETTINGS.APP_NAMES.includes(pathname);
     } catch {
         return false;
     }
@@ -121,7 +121,9 @@ export function buildApplicationDocumentationLinks(
     const detectedApp = detectApplicationFromUrl(currentUrl);
     if (!detectedApp) return [];
 
-    if (detectedApp === 'umbraco') {
+    const appSettings = SETTINGS.APPS[detectedApp];
+
+    if (appSettings?.linkedApp === APP.BRIEF) {
         const briefLink = buildBriefApplicationLink(currentUrl);
         return briefLink.url ? [briefLink] : [];
     }
@@ -133,13 +135,13 @@ export function buildApplicationDocumentationLinks(
 
     const links: LinkBuilderResult[] = [];
 
-    if (SETTINGS.APPS_WITH_UMBRACO.includes(detectedApp)) {
+    if (appSettings?.linkedApp === APP.UMBRACO) {
         links.push(buildUmbracoLink(currentUrl, localhostConfig));
     }
 
-    if (detectedApp === 'brief') {
+    if (appSettings?.apiDocs === 'swagger') {
         links.push(buildSwaggerLink(currentUrl, localhostConfig));
-    } else {
+    } else if (appSettings?.apiDocs === 'scalar') {
         links.push(buildScalarLink(detectedApp));
     }
 
@@ -147,16 +149,17 @@ export function buildApplicationDocumentationLinks(
 }
 
 function buildScalarLink(application: string): LinkBuilderResult {
-    return { url: `${SETTINGS.API_DOCS_BASE_URL}/${application}/scalar` };
+    return { url: `${SETTINGS.DOCUMENTATION_PORTAL.BASE_URL}/${application}/scalar` };
 }
 
 function buildAppLink(application: string): LinkBuilderResult {
-    return { url: `https://ikea.${application}.wppes-map-stage.com/` };
+    const { APP_LINK_TENANT, APP_LINK_DOMAIN } = SETTINGS.DOCUMENTATION_PORTAL;
+    return { url: `https://${APP_LINK_TENANT}.${application}.${APP_LINK_DOMAIN}/` };
 }
 
 function buildBriefApplicationLink(currentUrl: string): LinkBuilderResult {
     try {
-        const hostname = new URL(currentUrl).hostname.replace('.umbraco.', '.brief.');
+        const hostname = new URL(currentUrl).hostname.replace(`.${APP.UMBRACO}.`, `.${APP.BRIEF}.`);
         return { url: `https://${hostname}/` };
     } catch {
         return { url: '' };
