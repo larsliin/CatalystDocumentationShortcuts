@@ -44,11 +44,16 @@
                 <p class="eyebrow">QUICK ACCESS</p>
                 <h1>Environment resources</h1>
             </div>
+            <BaseLoadingBar v-if="loading" class="header-loading" label="Reading appConfig.json" />
         </header>
 
-        <section class="links-container" aria-label="Documentation links" :aria-busy="!ready">
-            <BaseLoadingBar v-if="loading" label="Reading appConfig.json" />
-            <template v-else-if="ready">
+        <section
+            class="links-container"
+            :class="{ 'is-loading': loading }"
+            aria-label="Documentation links"
+            :aria-busy="!ready"
+        >
+            <template v-if="ready && !loading">
                 <BaseAlert :message="error" variant="error" />
                 <BaseAlert :message="copyError" variant="error" />
                 <BaseAlert :message="warning" variant="warning" />
@@ -82,12 +87,21 @@
     }
 
     .popup-header {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 14px;
         margin: 18px 20px 0;
         padding: 0 0 16px;
         border-bottom: 1px solid var(--color-border);
+    }
+
+    .popup-header .header-loading {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        width: auto;
     }
 
     .header-mark {
@@ -139,5 +153,9 @@
         max-height: 480px;
         padding: 14px 20px 20px;
         overflow-y: auto;
+    }
+
+    .links-container.is-loading {
+        padding: 0 20px 20px;
     }
 </style>
