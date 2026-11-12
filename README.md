@@ -23,6 +23,10 @@ This keeps the workflow fast and reduces time spent navigating between the app a
 - Bootstrap Icons
 - Sharp for icon/favicon generation
 
+## Shared components
+
+This app uses shared UI components from the [Chrome Extension Component Library](https://github.com/larsliin/ChromeExtensionComponentLibrary/blob/main/docs/components/index.md).
+
 ## Prerequisites
 
 - Node.js 18+

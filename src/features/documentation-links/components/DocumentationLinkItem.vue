@@ -3,7 +3,7 @@
     import CheckIcon from 'bootstrap-icons/icons/check.svg?raw';
     import CopyIcon from 'bootstrap-icons/icons/copy.svg?raw';
     import ExternalLinkIcon from 'bootstrap-icons/icons/box-arrow-up-right.svg?raw';
-    import BaseButton from '@/components/base/BaseButton.vue';
+    import { BaseIconButton, BaseListItem } from 'chrome-extension-component-library';
     import type { DocumentationLink } from '../useDocumentationLinks';
 
     defineProps<{
@@ -18,28 +18,29 @@
 </script>
 
 <template>
-    <article class="link-item">
-        <div class="link-mark" aria-hidden="true">
+    <BaseListItem>
+        <template #icon>
             <span class="link-icon" v-html="BookIcon" />
-        </div>
+        </template>
         <div class="link-info">
-            <h2>{{ link.title }}</h2>
-            <p v-if="link.url" class="link-url">{{ link.url }}</p>
+            <h2 class="link-title" :title="link.title">{{ link.title }}</h2>
+            <p v-if="link.url" class="link-tagline" :title="link.url">
+                {{ link.url }}
+            </p>
         </div>
         <div v-if="link.url" class="link-actions">
-            <BaseButton
+            <BaseIconButton
                 class="open-button"
-                :aria-label="`Open ${link.title} documentation`"
-                :title="`Open ${link.title} documentation`"
+                variant="primary"
+                :label="`Open ${link.title} documentation`"
                 @click="emit('open', link.url)"
             >
                 <span class="open-icon" aria-hidden="true" v-html="ExternalLinkIcon" />
-            </BaseButton>
-            <button
+            </BaseIconButton>
+            <BaseIconButton
                 class="copy-button"
-                type="button"
-                :title="copied ? 'Copied' : `Copy ${link.title} link`"
-                :aria-label="copied ? 'Copied' : `Copy ${link.title} link`"
+                variant="secondary"
+                :label="copied ? 'Copied' : `Copy ${link.title} link`"
                 @click="emit('copy', link.url)"
             >
                 <span
@@ -48,42 +49,12 @@
                     aria-hidden="true"
                     v-html="copied ? CheckIcon : CopyIcon"
                 />
-            </button>
+            </BaseIconButton>
         </div>
-    </article>
+    </BaseListItem>
 </template>
 
 <style scoped>
-    .link-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background-color: var(--color-panel);
-        border: 1px solid var(--color-border);
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-        transition: background-color 0.16s, border-color 0.16s;
-        cursor: default;
-    }
-
-    .link-item:hover {
-        background-color: var(--color-panel-raised);
-        border-color: var(--color-focus);
-    }
-
-    .link-mark {
-        display: grid;
-        flex: 0 0 auto;
-        place-items: center;
-        width: 38px;
-        height: 38px;
-        color: var(--color-accent);
-        background: var(--color-bg);
-        border: 1px solid var(--color-border);
-        border-radius: 10px;
-    }
-
     .link-icon {
         display: grid;
         place-items: center;
@@ -95,32 +66,40 @@
     }
 
     .link-info {
-        flex: 1;
+        flex: 1 1 140px;
         min-width: 0;
     }
 
-    .link-item h2 {
+    .link-title {
+        overflow: hidden;
         margin: 0;
-        color: var(--color-text);
+        padding: 0;
+        border: 0;
         font-size: 14px;
         font-weight: 600;
         line-height: 1.35;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    .link-url {
-        margin-top: 3px;
-        color: var(--color-text-muted);
-        font-size: 11px;
+    .link-tagline {
         overflow: hidden;
+        margin: 3px 0 0;
+        font-size: 11px;
+        line-height: var(--line-height-base);
+        color: var(--color-text-muted);
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .link-actions {
         display: flex;
-        flex-shrink: 0;
+        flex-wrap: nowrap;
+        flex: 0 0 auto;
         align-items: center;
         gap: 7px;
+        max-width: 100%;
+        margin-left: auto;
     }
 
     .open-button,
@@ -148,28 +127,5 @@
     .copy-icon-copied :deep(svg) {
         width: 28px;
         height: 28px;
-    }
-
-    .copy-button {
-        color: var(--color-text);
-        background-color: var(--color-button-secondary);
-        border: 1px solid var(--color-button-secondary-border);
-        border-radius: var(--radius-button);
-        cursor: pointer;
-        transition: background-color 0.2s, border-color 0.2s;
-    }
-
-    .copy-button:focus-visible {
-        outline: 2px solid var(--color-focus);
-        outline-offset: 2px;
-    }
-
-    .copy-button:hover {
-        background-color: var(--color-button-secondary-hover);
-        border-color: var(--color-button-secondary-border-hover);
-    }
-
-    .copy-button:active {
-        background-color: var(--color-active);
     }
 </style>

@@ -26,6 +26,11 @@ Keep the interface simple and focused. Do not add unrelated features like file v
 - Keep Vue component files under 500 lines; split into smaller focused components if needed
 - Use the existing Vite setup and npm scripts; add dependencies only when necessary
 
+## Shared components
+
+- This app uses shared UI components from the [Chrome Extension Component Library](https://github.com/larsliin/ChromeExtensionComponentLibrary/blob/main/docs/components/index.md).
+- Prefer reusing the library's components over implementing duplicate base UI components.
+
 ## Config file handling
 
 - Config files are downloaded via the browser's default download mechanism

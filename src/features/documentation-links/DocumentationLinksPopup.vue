@@ -1,32 +1,24 @@
 <script setup lang="ts">
     import { computed, ref } from 'vue';
     import BookIcon from 'bootstrap-icons/icons/book-half.svg?raw';
-    import BaseAlert from '@/components/base/BaseAlert.vue';
-    import BaseLoadingBar from '@/components/base/BaseLoadingBar.vue';
+    import {
+        BaseAlert,
+        BaseLoadingBar,
+        useCopyToClipboard,
+    } from 'chrome-extension-component-library';
     import DocumentationLinkItem from './components/DocumentationLinkItem.vue';
     import { useDocumentationLinks } from './useDocumentationLinks';
 
     const { links, loading, ready, error, warning, notice } = useDocumentationLinks();
     const copyError = ref('');
-    const copiedUrl = ref('');
-    let copyFeedbackTimeout: ReturnType<typeof setTimeout> | undefined;
+    const { copy, isCopied, error: clipboardError } = useCopyToClipboard(1200);
 
     const isEmpty = computed(() => ready.value && !error.value && !notice.value && links.value.length === 0);
 
     async function copyToClipboard(url: string) {
         copyError.value = '';
-        copiedUrl.value = '';
-        clearTimeout(copyFeedbackTimeout);
-        try {
-            await navigator.clipboard.writeText(url);
-            copiedUrl.value = url;
-            copyFeedbackTimeout = setTimeout(() => {
-                copiedUrl.value = '';
-            }, 1200);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-            copyError.value = 'Could not copy the link to the clipboard.';
-        }
+        await copy(url, url);
+        copyError.value = clipboardError.value ?? '';
     }
 
     function openDocumentation(url: string) {
@@ -63,14 +55,16 @@
                     message="No documentation links are available for this page."
                     variant="info"
                 />
-                <DocumentationLinkItem
-                    v-for="link in links"
-                    :key="link.id"
-                    :link="link"
-                    :copied="copiedUrl === link.url"
-                    @open="openDocumentation"
-                    @copy="copyToClipboard"
-                />
+                <ul class="links-list">
+                    <DocumentationLinkItem
+                        v-for="link in links"
+                        :key="link.id"
+                        :link="link"
+                        :copied="isCopied(link.url)"
+                        @open="openDocumentation"
+                        @copy="copyToClipboard"
+                    />
+                </ul>
             </template>
         </section>
     </div>
@@ -157,5 +151,14 @@
 
     .links-container.is-loading {
         padding: 0 20px 20px;
+    }
+
+    .links-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
     }
 </style>
