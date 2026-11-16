@@ -29,7 +29,7 @@ This app uses shared UI components from the [Chrome Extension Component Library]
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 24 LTS (recommended)
 - npm
 - Chrome or a Chromium-based browser
 
@@ -38,6 +38,11 @@ This app uses shared UI components from the [Chrome Extension Component Library]
 ```bash
 npm install
 ```
+
+The shared component library is downloaded automatically from the pinned
+`v0.1.0` GitHub Release. No library checkout, sibling `packages/` directory, or
+GitHub login is needed. Commit `package.json` and `package-lock.json` together
+when updating its release URL. Use `npm ci` for an exact lockfile install.
 
 ## Available npm scripts
 
